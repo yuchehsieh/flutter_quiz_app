@@ -21,7 +21,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   int questionIndex = 0;
 
-  final List<Map> questionsWithAnswers = [
+  final List<Map> questionsWithAnswers = const [
     {
       'questionText': 'What\'s your favorite color ?',
       'answers': ['Black', 'White', 'Red', 'Pink']
@@ -33,15 +33,15 @@ class _MyAppState extends State<MyApp> {
   ];
 
   onChangedBtnPress() {
-    if (questionIndex == questionsWithAnswers.length - 1) {
-      setState(() {
-        questionIndex = 0;
-      });
-    } else {
-      setState(() {
-        questionIndex = questionIndex + 1;
-      });
-    }
+    setState(() {
+      questionIndex = questionIndex + 1;
+    });
+  }
+
+  onResetIndex() {
+    setState(() {
+      questionIndex = 0;
+    });
   }
 
   @override
@@ -50,31 +50,43 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
         theme: ThemeData(primaryColor: Colors.amberAccent),
         home: Scaffold(
-          appBar: AppBar(title: Text('Hello world')),
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Question(
-                    questionText: questionsWithAnswers[questionIndex]
-                        ['questionText']),
-                ...(questionsWithAnswers[questionIndex]['answers']
-                        as List<String>)
-                    .map((answer) => Answer(
-                          questionText: answer,
-                          onPressed: onChangedBtnPress,
-                        ))
-                    .toList()
-              ],
-              // map will generate the new List
-              // Column can not accept the List inside the children<List>
-              // or said: nested List
-              // so add the spread operator in front of the answer<List>
-              // It's pull the item in the answer<List> out and add to the
-              // Column( children: <Widget>[ .... ] );
-            ),
-          ),
-        ));
+            appBar: AppBar(title: Text('Hello world')),
+            body: Center(
+                child: (questionIndex < questionsWithAnswers.length)
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Question(
+                              questionText: questionsWithAnswers[questionIndex]
+                                  ['questionText']),
+                          ...(questionsWithAnswers[questionIndex]['answers']
+                                  as List<String>)
+                              .map((answer) => Answer(
+                                    questionText: answer,
+                                    onPressed: onChangedBtnPress,
+                                  ))
+                              .toList()
+                        ],
+                        // map will generate the new List
+                        // Column can not accept the List inside the children<List>
+                        // or said: nested List
+                        // so add the spread operator in front of the answer<List>
+                        // It's pull the item in the answer<List> out and add to the
+                        // Column( children: <Widget>[ .... ] );
+                      )
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Text(
+                            'You did great',
+                            textAlign: TextAlign.center,
+                          ),
+                          RaisedButton(
+                              onPressed: onResetIndex,
+                              color: Theme.of(context).primaryColor,
+                              child: Text('Back to question 1'))
+                        ],
+                      ))));
   }
 }
 
