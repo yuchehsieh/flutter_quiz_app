@@ -20,27 +20,40 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   int _questionIndex = 0;
+  int _userScore = 0;
 
   final List<Map> _questionsWithAnswers = const [
     {
       'questionText': 'What\'s your favorite color ?',
-      'answers': ['Black', 'White', 'Red', 'Pink']
+      'answers': [
+        {'text': 'Black', 'score': 10},
+        {'text': 'White', 'score': 10},
+        {'text': 'Red', 'score': 15},
+        {'text': 'Pink', 'score': 8},
+      ]
     },
     {
       'questionText': 'What\'s your favorite animal ?',
-      'answers': ['Rabbit', 'Dog', 'Cat', 'Rat']
+      'answers': [
+        {'text': 'Rabbit', 'score': 15},
+        {'text': 'Dog', 'score': 10},
+        {'text': 'Cat', 'score': 10},
+        {'text': 'Rat', 'score': 40},
+      ]
     }
   ];
 
-  _onChangedBtnPress() {
+  void _onAnswerBtnPressed({@required int score}) {
     setState(() {
+      _userScore = _userScore + score;
       _questionIndex = _questionIndex + 1;
     });
   }
 
-  _onResetIndex() {
+  void _onResetIndex() {
     setState(() {
       _questionIndex = 0;
+      _userScore = 0;
     });
   }
 
@@ -56,8 +69,8 @@ class _MyAppState extends State<MyApp> {
               ? Quiz(
                   questionsWithAnswers: _questionsWithAnswers,
                   questionIndex: _questionIndex,
-                  onChangedBtnPress: _onChangedBtnPress)
-              : Result(_onResetIndex),
+                  onAnswerBtnPress: _onAnswerBtnPressed)
+              : Result(_onResetIndex, _userScore),
         ),
       ),
     );
@@ -67,12 +80,12 @@ class _MyAppState extends State<MyApp> {
 class Quiz extends StatelessWidget {
   final List<Map> questionsWithAnswers;
   final int questionIndex;
-  final Function onChangedBtnPress;
+  final Function onAnswerBtnPress;
 
   Quiz(
       {@required this.questionsWithAnswers,
       @required this.questionIndex,
-      @required this.onChangedBtnPress});
+      @required this.onAnswerBtnPress});
 
   @override
   Widget build(BuildContext context) {
@@ -82,11 +95,12 @@ class Quiz extends StatelessWidget {
       children: <Widget>[
         Question(
             questionText: questionsWithAnswers[questionIndex]['questionText']),
-        ...(questionsWithAnswers[questionIndex]['answers'] as List<String>)
+        ...(questionsWithAnswers[questionIndex]['answers'] as List<Map>)
             .map((answer) => Answer(
-                  questionText: answer,
-                  onPressed: onChangedBtnPress,
-                ))
+                questionText: answer['text'],
+                onPressed: () {
+                  onAnswerBtnPress(score: answer['score']);
+                }))
             .toList()
       ],
       // map will generate the new List
@@ -101,8 +115,19 @@ class Quiz extends StatelessWidget {
 
 class Result extends StatelessWidget {
   final Function onResetIndex;
+  final int userScore;
 
-  Result(this.onResetIndex);
+  Result(this.onResetIndex, this.userScore);
+
+  String get scoreDesc {
+    String desc;
+    if (userScore <= 30) {
+      desc = 'You are a normal guy, you got $userScore';
+    } else {
+      desc = 'You ar kind of a strange person, you got $userScore';
+    }
+    return desc;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,6 +139,12 @@ class Result extends StatelessWidget {
           'You did great',
           textAlign: TextAlign.center,
         ),
+        Text(scoreDesc,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w400,
+                color: Colors.deepOrange)),
         RaisedButton(
             onPressed: onResetIndex,
             color: Theme.of(context).primaryColor,
