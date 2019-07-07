@@ -19,9 +19,9 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  int questionIndex = 0;
+  int _questionIndex = 0;
 
-  final List<Map> questionsWithAnswers = const [
+  final List<Map> _questionsWithAnswers = const [
     {
       'questionText': 'What\'s your favorite color ?',
       'answers': ['Black', 'White', 'Red', 'Pink']
@@ -32,15 +32,15 @@ class _MyAppState extends State<MyApp> {
     }
   ];
 
-  onChangedBtnPress() {
+  _onChangedBtnPress() {
     setState(() {
-      questionIndex = questionIndex + 1;
+      _questionIndex = _questionIndex + 1;
     });
   }
 
-  onResetIndex() {
+  _onResetIndex() {
     setState(() {
-      questionIndex = 0;
+      _questionIndex = 0;
     });
   }
 
@@ -48,45 +48,78 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     // TODO: implement build
     return MaterialApp(
-        theme: ThemeData(primaryColor: Colors.amberAccent),
-        home: Scaffold(
-            appBar: AppBar(title: Text('Hello world')),
-            body: Center(
-                child: (questionIndex < questionsWithAnswers.length)
-                    ? Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Question(
-                              questionText: questionsWithAnswers[questionIndex]
-                                  ['questionText']),
-                          ...(questionsWithAnswers[questionIndex]['answers']
-                                  as List<String>)
-                              .map((answer) => Answer(
-                                    questionText: answer,
-                                    onPressed: onChangedBtnPress,
-                                  ))
-                              .toList()
-                        ],
-                        // map will generate the new List
-                        // Column can not accept the List inside the children<List>
-                        // or said: nested List
-                        // so add the spread operator in front of the answer<List>
-                        // It's pull the item in the answer<List> out and add to the
-                        // Column( children: <Widget>[ .... ] );
-                      )
-                    : Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Text(
-                            'You did great',
-                            textAlign: TextAlign.center,
-                          ),
-                          RaisedButton(
-                              onPressed: onResetIndex,
-                              color: Theme.of(context).primaryColor,
-                              child: Text('Back to question 1'))
-                        ],
-                      ))));
+      theme: ThemeData(primaryColor: Colors.amberAccent),
+      home: Scaffold(
+        appBar: AppBar(title: Text('Hello world')),
+        body: Center(
+          child: (_questionIndex < _questionsWithAnswers.length)
+              ? Quiz(
+                  questionsWithAnswers: _questionsWithAnswers,
+                  questionIndex: _questionIndex,
+                  onChangedBtnPress: _onChangedBtnPress)
+              : Result(_onResetIndex),
+        ),
+      ),
+    );
+  }
+}
+
+class Quiz extends StatelessWidget {
+  final List<Map> questionsWithAnswers;
+  final int questionIndex;
+  final Function onChangedBtnPress;
+
+  Quiz(
+      {@required this.questionsWithAnswers,
+      @required this.questionIndex,
+      @required this.onChangedBtnPress});
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Question(
+            questionText: questionsWithAnswers[questionIndex]['questionText']),
+        ...(questionsWithAnswers[questionIndex]['answers'] as List<String>)
+            .map((answer) => Answer(
+                  questionText: answer,
+                  onPressed: onChangedBtnPress,
+                ))
+            .toList()
+      ],
+      // map will generate the new List
+      // Column can not accept the List inside the children<List>
+      // or said: nested List
+      // so add the spread operator in front of the answer<List>
+      // It's pull the item in the answer<List> out and add to the
+      // Column( children: <Widget>[ .... ] );
+    );
+  }
+}
+
+class Result extends StatelessWidget {
+  final Function onResetIndex;
+
+  Result(this.onResetIndex);
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Text(
+          'You did great',
+          textAlign: TextAlign.center,
+        ),
+        RaisedButton(
+            onPressed: onResetIndex,
+            color: Theme.of(context).primaryColor,
+            child: Text('Back to question 1'))
+      ],
+    );
   }
 }
 
